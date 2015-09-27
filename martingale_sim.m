@@ -1,5 +1,7 @@
 
 
+
+% mcc -R -singleCompThread -mv -o martingale_sim martingale_sim.m -R -nodisplay   % (For serial)
 %% Betting algorithm
 clear
 
@@ -81,11 +83,14 @@ while do_continue
     
 end
 
+figure('visible','off');
 if any(isinf(bank_hist))
-    figure; plot(0:Nplays,earnings_hist);xlabel('Turn number'); ylabel('Net earnings');
+    plot(0:Nplays,earnings_hist);xlabel('Turn number'); ylabel('Net earnings');
 else
-    figure; plot(0:Nplays,bank_hist);xlabel('Turn number'); ylabel('Bank account');
+    plot(0:Nplays,bank_hist);xlabel('Turn number'); ylabel('Bank account');
 end
+
+saveas(gcf,'figure1','png')
 
 
 
