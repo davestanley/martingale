@@ -1,0 +1,2251 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>betting_simulation</title><meta name="generator" content="MATLAB 8.1"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-09-27"><meta name="DC.source" content="betting_simulation.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1></h1><!--introduction--><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Betting algorithm</a></li></ul></div><h2>Betting algorithm<a name="1"></a></h2><pre class="codeinput">clear
+
+get_user_input = 0;
+
+<span class="keyword">if</span> get_user_input
+    <span class="comment">% Get starting value of bank</span>
+    prompt = <span class="string">'Welcome to  stanley casino. How much money did you bring? (starting size of bank) '</span>;
+    returns = input(prompt,<span class="string">'s'</span>);
+    bank = str2num(returns);
+
+
+    <span class="comment">% Max turns</span>
+    prompt = <span class="string">'Maximum number of turns? (Inf for unlimited)'</span>;
+    returns = input(prompt,<span class="string">'s'</span>);
+    max_turns = str2num(returns);
+
+    <span class="comment">% Autoplay mode</span>
+    prompt = <span class="string">'Autoplay martingale mode? (y/n)'</span>;
+    returns = input(prompt,<span class="string">'s'</span>);
+    autoplay = returns;
+<span class="keyword">else</span>
+    bank=10000;
+    max_turns = 1000;
+    autoplay = <span class="string">'y'</span>;
+
+<span class="keyword">end</span>
+
+<span class="comment">% Initialize histories</span>
+earnings = 0;
+bank_hist = bank;
+earnings_hist = earnings;
+
+
+do_continue = 1;
+Nplays = 0;
+autobet0 = 1;               <span class="comment">% Starting bet for autobet mode.</span>
+bet_predict = autobet0;
+
+<span class="keyword">while</span> do_continue
+    <span class="comment">%autobet0 = bank*0.01;</span>
+    Nplays = Nplays + 1;
+
+    <span class="keyword">if</span> strcmp(autoplay,<span class="string">'n'</span>);
+        <span class="comment">% Get user's bet</span>
+        prompt = [<span class="string">'Balance = '</span> num2str(bank) <span class="string">'. Enter your bet, or press q to quit: '</span>];
+        returns = input(prompt,<span class="string">'s'</span>);
+        <span class="keyword">if</span> strcmp(returns,<span class="string">'q'</span>); do_continue = 0;
+        <span class="keyword">end</span>
+        bet=str2num(returns);
+    <span class="keyword">else</span>
+        prompt = [<span class="string">'Balance = '</span> num2str(bank) <span class="string">'. Enter your bet, or press q to quit: '</span>];
+        fprintf(prompt);
+        bet=bet_predict;
+        fprintf([num2str(bet) <span class="string">'\n'</span>]);
+    <span class="keyword">end</span>
+
+
+
+    <span class="keyword">if</span> randn(1,1) &gt; 0
+        fprintf(<span class="string">'You won \n'</span>);
+        winnings = bet;
+        bet_predict = autobet0;
+    <span class="keyword">else</span>
+        fprintf(<span class="string">'You lost \n'</span>);
+        winnings = -1*bet;
+        bet_predict = bet*2;
+    <span class="keyword">end</span>
+
+    <span class="comment">% Update bank, recording histories</span>
+    bank = bank + winnings;
+    earnings = earnings + winnings;
+
+    bank_hist = [bank_hist bank];
+    earnings_hist = [earnings_hist earnings];
+
+    <span class="keyword">if</span> bank &lt;= 0; fprintf(<span class="string">'You are out of money!'</span>); do_continue = 0; <span class="keyword">end</span>
+    <span class="keyword">if</span> Nplays &gt; max_turns; fprintf(<span class="string">'Out of turns. Simulation ended.'</span>); do_continue = 0; <span class="keyword">end</span>
+
+<span class="keyword">end</span>
+
+<span class="keyword">if</span> any(isinf(bank_hist))
+    figure; plot(0:Nplays,earnings_hist);xlabel(<span class="string">'Turn number'</span>); ylabel(<span class="string">'Net earnings'</span>);
+<span class="keyword">else</span>
+    figure; plot(0:Nplays,bank_hist);xlabel(<span class="string">'Turn number'</span>); ylabel(<span class="string">'Bank account'</span>);
+<span class="keyword">end</span>
+</pre><pre class="codeoutput">Balance = 10000. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 9999. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 9997. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 9993. Enter your bet, or press q to quit: 8
+You won 
+Balance = 10001. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10002. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10001. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 9999. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 9995. Enter your bet, or press q to quit: 8
+You won 
+Balance = 10003. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10002. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10000. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10004. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10005. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10006. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10005. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10007. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10008. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10007. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10005. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10009. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10008. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10006. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10010. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10011. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10010. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10012. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10013. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10012. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10014. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10015. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10016. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10015. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10017. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10018. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10017. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10015. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10011. Enter your bet, or press q to quit: 8
+You lost 
+Balance = 10003. Enter your bet, or press q to quit: 16
+You won 
+Balance = 10019. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10018. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10016. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10020. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10019. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10021. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10022. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10023. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10024. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10025. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10026. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10027. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10028. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10027. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10025. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10021. Enter your bet, or press q to quit: 8
+You won 
+Balance = 10029. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10030. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10029. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10027. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10023. Enter your bet, or press q to quit: 8
+You won 
+Balance = 10031. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10030. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10032. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10031. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10029. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10025. Enter your bet, or press q to quit: 8
+You lost 
+Balance = 10017. Enter your bet, or press q to quit: 16
+You lost 
+Balance = 10001. Enter your bet, or press q to quit: 32
+You won 
+Balance = 10033. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10032. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10030. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10034. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10033. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10031. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10027. Enter your bet, or press q to quit: 8
+You won 
+Balance = 10035. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10034. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10036. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10035. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10033. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10029. Enter your bet, or press q to quit: 8
+You won 
+Balance = 10037. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10038. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10039. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10040. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10041. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10040. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10042. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10041. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10043. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10044. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10045. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10044. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10042. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10046. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10045. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10047. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10048. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10047. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10045. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10049. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10048. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10046. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10050. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10051. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10050. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10048. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10052. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10051. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10049. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10045. Enter your bet, or press q to quit: 8
+You lost 
+Balance = 10037. Enter your bet, or press q to quit: 16
+You won 
+Balance = 10053. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10052. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10054. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10053. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10051. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10047. Enter your bet, or press q to quit: 8
+You won 
+Balance = 10055. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10054. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10052. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10048. Enter your bet, or press q to quit: 8
+You won 
+Balance = 10056. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10057. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10058. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10059. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10060. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10061. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10062. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10061. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10063. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10064. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10063. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10061. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10065. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10064. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10062. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10058. Enter your bet, or press q to quit: 8
+You lost 
+Balance = 10050. Enter your bet, or press q to quit: 16
+You lost 
+Balance = 10034. Enter your bet, or press q to quit: 32
+You won 
+Balance = 10066. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10067. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10066. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10064. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10068. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10069. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10070. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10071. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10072. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10071. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10073. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10072. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10074. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10073. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10071. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10075. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10074. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10076. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10077. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10076. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10078. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10077. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10079. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10078. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10076. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10072. Enter your bet, or press q to quit: 8
+You lost 
+Balance = 10064. Enter your bet, or press q to quit: 16
+You lost 
+Balance = 10048. Enter your bet, or press q to quit: 32
+You won 
+Balance = 10080. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10081. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10082. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10081. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10079. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10075. Enter your bet, or press q to quit: 8
+You won 
+Balance = 10083. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10084. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10083. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10081. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10077. Enter your bet, or press q to quit: 8
+You won 
+Balance = 10085. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10084. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10082. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10086. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10085. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10083. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10079. Enter your bet, or press q to quit: 8
+You won 
+Balance = 10087. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10088. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10087. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10089. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10090. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10089. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10091. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10090. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10092. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10091. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10093. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10094. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10093. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10095. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10096. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10097. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10098. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10099. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10100. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10099. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10097. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10101. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10102. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10103. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10104. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10103. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10105. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10106. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10105. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10103. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10099. Enter your bet, or press q to quit: 8
+You won 
+Balance = 10107. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10106. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10108. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10107. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10109. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10110. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10111. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10112. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10111. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10113. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10114. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10115. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10114. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10112. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10116. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10115. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10117. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10116. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10114. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10110. Enter your bet, or press q to quit: 8
+You lost 
+Balance = 10102. Enter your bet, or press q to quit: 16
+You won 
+Balance = 10118. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10119. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10118. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10116. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10120. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10121. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10122. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10121. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10119. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10115. Enter your bet, or press q to quit: 8
+You won 
+Balance = 10123. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10122. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10124. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10123. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10125. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10126. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10127. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10126. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10124. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10120. Enter your bet, or press q to quit: 8
+You won 
+Balance = 10128. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10129. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10128. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10130. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10129. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10131. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10130. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10128. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10124. Enter your bet, or press q to quit: 8
+You won 
+Balance = 10132. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10133. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10132. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10130. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10134. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10135. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10134. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10136. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10135. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10133. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10129. Enter your bet, or press q to quit: 8
+You won 
+Balance = 10137. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10138. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10139. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10138. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10140. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10139. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10141. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10142. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10141. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10143. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10144. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10143. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10141. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10145. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10144. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10146. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10147. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10148. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10147. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10145. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10149. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10150. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10151. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10150. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10152. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10153. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10154. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10155. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10154. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10156. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10155. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10153. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10157. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10156. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10154. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10158. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10159. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10160. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10161. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10160. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10162. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10161. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10163. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10164. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10165. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10164. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10162. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10158. Enter your bet, or press q to quit: 8
+You won 
+Balance = 10166. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10167. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10166. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10168. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10169. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10170. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10171. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10170. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10172. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10171. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10173. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10172. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10174. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10173. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10171. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10175. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10174. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10176. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10177. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10178. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10177. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10175. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10171. Enter your bet, or press q to quit: 8
+You won 
+Balance = 10179. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10180. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10179. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10181. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10182. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10183. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10182. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10184. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10183. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10185. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10186. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10185. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10187. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10188. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10189. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10190. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10189. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10187. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10183. Enter your bet, or press q to quit: 8
+You won 
+Balance = 10191. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10190. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10192. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10191. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10193. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10192. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10190. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10186. Enter your bet, or press q to quit: 8
+You lost 
+Balance = 10178. Enter your bet, or press q to quit: 16
+You lost 
+Balance = 10162. Enter your bet, or press q to quit: 32
+You lost 
+Balance = 10130. Enter your bet, or press q to quit: 64
+You won 
+Balance = 10194. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10193. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10191. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10195. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10196. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10197. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10196. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10194. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10198. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10199. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10200. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10201. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10202. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10203. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10204. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10205. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10206. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10205. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10203. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10199. Enter your bet, or press q to quit: 8
+You lost 
+Balance = 10191. Enter your bet, or press q to quit: 16
+You won 
+Balance = 10207. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10208. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10209. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10210. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10211. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10210. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10208. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10212. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10213. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10214. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10213. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10211. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10215. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10216. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10215. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10213. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10217. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10218. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10217. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10215. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10219. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10218. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10220. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10219. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10217. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10213. Enter your bet, or press q to quit: 8
+You won 
+Balance = 10221. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10220. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10218. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10222. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10221. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10223. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10224. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10223. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10225. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10226. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10227. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10228. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10229. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10228. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10230. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10231. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10232. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10231. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10233. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10232. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10234. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10233. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10231. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10235. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10234. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10232. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10228. Enter your bet, or press q to quit: 8
+You lost 
+Balance = 10220. Enter your bet, or press q to quit: 16
+You lost 
+Balance = 10204. Enter your bet, or press q to quit: 32
+You lost 
+Balance = 10172. Enter your bet, or press q to quit: 64
+You won 
+Balance = 10236. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10235. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10237. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10238. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10239. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10240. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10239. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10237. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10233. Enter your bet, or press q to quit: 8
+You won 
+Balance = 10241. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10240. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10238. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10234. Enter your bet, or press q to quit: 8
+You lost 
+Balance = 10226. Enter your bet, or press q to quit: 16
+You won 
+Balance = 10242. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10243. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10244. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10245. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10246. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10245. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10247. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10248. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10249. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10248. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10246. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10242. Enter your bet, or press q to quit: 8
+You lost 
+Balance = 10234. Enter your bet, or press q to quit: 16
+You lost 
+Balance = 10218. Enter your bet, or press q to quit: 32
+You lost 
+Balance = 10186. Enter your bet, or press q to quit: 64
+You lost 
+Balance = 10122. Enter your bet, or press q to quit: 128
+You won 
+Balance = 10250. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10249. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10251. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10252. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10253. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10252. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10254. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10253. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10251. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10255. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10254. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10252. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10256. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10255. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10257. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10258. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10257. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10259. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10260. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10261. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10260. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10258. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10262. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10261. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10263. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10262. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10264. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10265. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10264. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10266. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10267. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10268. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10267. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10265. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10269. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10268. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10270. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10271. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10272. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10273. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10274. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10275. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10276. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10275. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10273. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10277. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10276. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10274. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10278. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10277. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10275. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10279. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10280. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10281. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10282. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10281. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10279. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10283. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10282. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10280. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10284. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10285. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10284. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10286. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10287. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10288. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10287. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10285. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10281. Enter your bet, or press q to quit: 8
+You lost 
+Balance = 10273. Enter your bet, or press q to quit: 16
+You won 
+Balance = 10289. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10290. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10291. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10290. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10288. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10292. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10291. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10293. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10292. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10290. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10294. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10293. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10295. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10296. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10297. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10296. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10298. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10299. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10300. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10301. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10300. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10302. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10301. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10303. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10304. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10305. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10304. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10306. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10305. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10307. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10308. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10309. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10308. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10310. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10309. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10311. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10312. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10311. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10309. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10305. Enter your bet, or press q to quit: 8
+You lost 
+Balance = 10297. Enter your bet, or press q to quit: 16
+You lost 
+Balance = 10281. Enter your bet, or press q to quit: 32
+You lost 
+Balance = 10249. Enter your bet, or press q to quit: 64
+You won 
+Balance = 10313. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10312. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10314. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10313. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10311. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10315. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10314. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10312. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10316. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10317. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10316. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10314. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10318. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10319. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10318. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10316. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10320. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10319. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10321. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10322. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10321. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10319. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10323. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10322. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10324. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10323. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10321. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10325. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10324. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10322. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10326. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10325. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10323. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10327. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10326. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10324. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10328. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10327. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10325. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10329. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10328. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10326. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10322. Enter your bet, or press q to quit: 8
+You lost 
+Balance = 10314. Enter your bet, or press q to quit: 16
+You won 
+Balance = 10330. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10329. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10331. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10332. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10333. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10332. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10334. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10333. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10335. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10336. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10337. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10338. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10337. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10335. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10339. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10338. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10336. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10332. Enter your bet, or press q to quit: 8
+You lost 
+Balance = 10324. Enter your bet, or press q to quit: 16
+You lost 
+Balance = 10308. Enter your bet, or press q to quit: 32
+You won 
+Balance = 10340. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10341. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10340. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10338. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10334. Enter your bet, or press q to quit: 8
+You lost 
+Balance = 10326. Enter your bet, or press q to quit: 16
+You won 
+Balance = 10342. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10343. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10344. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10343. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10345. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10346. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10345. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10343. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10339. Enter your bet, or press q to quit: 8
+You lost 
+Balance = 10331. Enter your bet, or press q to quit: 16
+You won 
+Balance = 10347. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10346. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10344. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10348. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10349. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10348. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10350. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10349. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10351. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10350. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10348. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10344. Enter your bet, or press q to quit: 8
+You lost 
+Balance = 10336. Enter your bet, or press q to quit: 16
+You won 
+Balance = 10352. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10353. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10352. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10350. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10354. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10355. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10354. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10352. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10356. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10355. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10353. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10349. Enter your bet, or press q to quit: 8
+You won 
+Balance = 10357. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10358. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10359. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10360. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10359. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10361. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10362. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10363. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10362. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10364. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10363. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10361. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10365. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10366. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10367. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10366. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10368. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10367. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10365. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10361. Enter your bet, or press q to quit: 8
+You won 
+Balance = 10369. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10370. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10369. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10367. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10363. Enter your bet, or press q to quit: 8
+You won 
+Balance = 10371. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10370. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10372. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10371. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10373. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10372. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10370. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10366. Enter your bet, or press q to quit: 8
+You won 
+Balance = 10374. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10375. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10374. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10376. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10377. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10376. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10378. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10379. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10380. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10379. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10377. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10373. Enter your bet, or press q to quit: 8
+You lost 
+Balance = 10365. Enter your bet, or press q to quit: 16
+You lost 
+Balance = 10349. Enter your bet, or press q to quit: 32
+You lost 
+Balance = 10317. Enter your bet, or press q to quit: 64
+You won 
+Balance = 10381. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10380. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10382. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10383. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10384. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10385. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10384. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10386. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10387. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10386. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10388. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10389. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10390. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10389. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10387. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10391. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10390. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10388. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10384. Enter your bet, or press q to quit: 8
+You lost 
+Balance = 10376. Enter your bet, or press q to quit: 16
+You lost 
+Balance = 10360. Enter your bet, or press q to quit: 32
+You won 
+Balance = 10392. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10391. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10389. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10393. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10394. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10395. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10396. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10397. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10398. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10399. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10398. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10396. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10392. Enter your bet, or press q to quit: 8
+You won 
+Balance = 10400. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10399. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10401. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10402. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10401. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10403. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10404. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10405. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10406. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10407. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10408. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10407. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10409. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10410. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10409. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10407. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10403. Enter your bet, or press q to quit: 8
+You won 
+Balance = 10411. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10410. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10412. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10413. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10412. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10414. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10413. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10415. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10416. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10415. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10417. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10418. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10417. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10415. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10411. Enter your bet, or press q to quit: 8
+You won 
+Balance = 10419. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10420. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10419. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10417. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10421. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10420. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10422. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10423. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10424. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10423. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10425. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10424. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10422. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10418. Enter your bet, or press q to quit: 8
+You won 
+Balance = 10426. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10427. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10426. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10428. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10427. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10425. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10421. Enter your bet, or press q to quit: 8
+You won 
+Balance = 10429. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10430. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10429. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10427. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10431. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10430. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10428. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10432. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10433. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10434. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10433. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10435. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10436. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10435. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10433. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10429. Enter your bet, or press q to quit: 8
+You won 
+Balance = 10437. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10436. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10434. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10438. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10439. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10440. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10439. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10441. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10442. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10443. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10442. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10440. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10444. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10445. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10446. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10445. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10447. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10446. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10448. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10449. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10450. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10449. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10451. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10450. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10452. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10451. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10453. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10452. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10450. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10446. Enter your bet, or press q to quit: 8
+You lost 
+Balance = 10438. Enter your bet, or press q to quit: 16
+You won 
+Balance = 10454. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10453. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10455. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10454. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10452. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10456. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10457. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10458. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10459. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10458. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10460. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10459. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10461. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10460. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10462. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10463. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10462. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10460. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10464. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10465. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10466. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10465. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10463. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10467. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10468. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10469. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10468. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10466. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10470. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10471. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10472. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10471. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10469. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10473. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10474. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10475. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10476. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10477. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10476. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10478. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10477. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10475. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10471. Enter your bet, or press q to quit: 8
+You won 
+Balance = 10479. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10480. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10479. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10481. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10482. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10481. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10479. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10475. Enter your bet, or press q to quit: 8
+You won 
+Balance = 10483. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10482. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10480. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10476. Enter your bet, or press q to quit: 8
+You won 
+Balance = 10484. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10483. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10481. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10485. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10484. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10486. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10485. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10487. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10486. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10488. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10489. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10490. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10491. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10492. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10493. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10494. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10493. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10491. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10487. Enter your bet, or press q to quit: 8
+You lost 
+Balance = 10479. Enter your bet, or press q to quit: 16
+You won 
+Balance = 10495. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10496. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10497. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10498. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10497. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10495. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10499. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10500. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10499. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10497. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10501. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10500. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10502. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10503. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10504. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10503. Enter your bet, or press q to quit: 2
+You won 
+Balance = 10505. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10506. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10507. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10508. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10509. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10510. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10509. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10507. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10511. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10510. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10508. Enter your bet, or press q to quit: 4
+You won 
+Balance = 10512. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10513. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10514. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10515. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10514. Enter your bet, or press q to quit: 2
+You lost 
+Balance = 10512. Enter your bet, or press q to quit: 4
+You lost 
+Balance = 10508. Enter your bet, or press q to quit: 8
+You lost 
+Balance = 10500. Enter your bet, or press q to quit: 16
+You won 
+Balance = 10516. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10517. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10518. Enter your bet, or press q to quit: 1
+You won 
+Balance = 10519. Enter your bet, or press q to quit: 1
+You lost 
+Balance = 10518. Enter your bet, or press q to quit: 2
+You lost 
+Out of turns. Simulation ended.</pre><img vspace="5" hspace="5" src="betting_simulation_01.png" alt=""> <p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2013a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+
+
+%% Betting algorithm
+clear
+
+get_user_input = 0;
+
+if get_user_input
+    % Get starting value of bank
+    prompt = 'Welcome to  stanley casino. How much money did you bring? (starting size of bank) ';
+    returns = input(prompt,'s');
+    bank = str2num(returns);
+
+
+    % Max turns
+    prompt = 'Maximum number of turns? (Inf for unlimited)';
+    returns = input(prompt,'s');
+    max_turns = str2num(returns);
+
+    % Autoplay mode
+    prompt = 'Autoplay martingale mode? (y/n)';
+    returns = input(prompt,'s');
+    autoplay = returns;
+else
+    bank=10000;
+    max_turns = 1000;
+    autoplay = 'y';
+    
+end
+
+% Initialize histories
+earnings = 0;
+bank_hist = bank;
+earnings_hist = earnings;
+
+
+do_continue = 1;
+Nplays = 0;
+autobet0 = 1;               % Starting bet for autobet mode.
+bet_predict = autobet0;
+
+while do_continue
+    %autobet0 = bank*0.01;
+    Nplays = Nplays + 1;
+    
+    if strcmp(autoplay,'n');
+        % Get user's bet
+        prompt = ['Balance = ' num2str(bank) '. Enter your bet, or press q to quit: '];
+        returns = input(prompt,'s');
+        if strcmp(returns,'q'); do_continue = 0;
+        end
+        bet=str2num(returns);
+    else
+        prompt = ['Balance = ' num2str(bank) '. Enter your bet, or press q to quit: '];
+        fprintf(prompt);
+        bet=bet_predict;
+        fprintf([num2str(bet) '\n']);
+    end
+    
+    
+    
+    if randn(1,1) > 0
+        fprintf('You won \n');
+        winnings = bet;
+        bet_predict = autobet0;
+    else
+        fprintf('You lost \n');
+        winnings = -1*bet;
+        bet_predict = bet*2;
+    end
+    
+    % Update bank, recording histories
+    bank = bank + winnings;
+    earnings = earnings + winnings;
+    
+    bank_hist = [bank_hist bank];
+    earnings_hist = [earnings_hist earnings];
+    
+    if bank <= 0; fprintf('You are out of money!'); do_continue = 0; end
+    if Nplays > max_turns; fprintf('Out of turns. Simulation ended.'); do_continue = 0; end
+    
+end
+
+if any(isinf(bank_hist))
+    figure; plot(0:Nplays,earnings_hist);xlabel('Turn number'); ylabel('Net earnings');
+else
+    figure; plot(0:Nplays,bank_hist);xlabel('Turn number'); ylabel('Bank account');
+end
+
+
+
+
+
+##### SOURCE END #####
+--></body></html>
